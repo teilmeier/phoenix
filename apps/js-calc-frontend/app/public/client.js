@@ -19,6 +19,7 @@ angular.module('CalculatorApp', [])
                 };
                 if ($scope.id === undefined){
                     $scope.id = 42;
+                    $scope.responses =  [];
                 }
 
                 $http.get(getUrl, {}, config)
@@ -29,6 +30,17 @@ angular.module('CalculatorApp', [])
                     });                
             };
 
+            $scope.CalculateCssClass = function(versionValue){
+                if (versionValue && versionValue != undefined){
+                    if (versionValue.toString().indexOf("blue") >= 0)
+                        return "bg-info";
+                    else if (versionValue.toString().indexOf("green") >= 0)
+                        return "bg-green";
+                    else
+                        return "bg-yellow";
+                }
+            }
+
             $scope.Calculate = function () {
                 var postUrl = apiUrl + 'calculation';
                 var config = {
@@ -37,10 +49,14 @@ angular.module('CalculatorApp', [])
                         'number': $scope.id
                     }
                 };
+                $scope.requeststartDate = new Date();
                 window.appInsights.trackEvent("calculation-client-call-start", { value: $scope.id});
                 $http.post(postUrl, { 'number': $scope.id }, config)
                     .success(function (response) { 
+                        var endDate = new Date();
+                        response.duration = endDate - $scope.requeststartDate
                         $scope.result = response;
+                        $scope.responses.splice(0,0,response);
                         console.log("received response:");
                         console.log(response);
                         if (window.appInsights){
